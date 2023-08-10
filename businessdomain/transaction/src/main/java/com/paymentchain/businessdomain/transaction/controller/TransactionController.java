@@ -32,8 +32,6 @@ public class TransactionController {
         return ResponseEntity.ok(save);
     }
 
-    aea
-
     @PutMapping("/{id}")
     public ResponseEntity<?> updateTransaction(@PathVariable long id, @RequestBody Transaction inputTransaction){
 

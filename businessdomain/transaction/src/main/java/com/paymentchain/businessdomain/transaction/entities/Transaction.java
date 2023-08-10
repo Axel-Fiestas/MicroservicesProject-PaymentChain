@@ -12,6 +12,38 @@ import java.util.Date;
 @Data
 public class Transaction {
 
+    enum Status{
+
+        PENDIENTE("01"),
+        LIQUIDADA("02"),
+        RECHAZADA("03"),
+        CANCELADA("04");
+
+        private final String codeStatus;
+
+        Status(String codeStatus){
+            this.codeStatus=codeStatus;
+        }
+        private String getCodeStatus(){
+            return codeStatus;
+        }
+
+        private String getStatusByCode(String codeStatus){
+            switch (codeStatus){
+                case "01":
+                    return Status.PENDIENTE.name();
+                case "02":
+                    return Status.LIQUIDADA.name();
+                case "03":
+                    return Status.RECHAZADA.name();
+                case "04":
+                    return Status.CANCELADA.name();
+                default:
+                    return "00";
+            }
+        }
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;

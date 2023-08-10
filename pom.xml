@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <!-- https://maven.apache.org/plugins/maven-site-plugin/examples/creating-content.html
+ Maven build has a specific lifecyle to deploy and distribuite de project
+LIFECYCLES:
+  There are 3 cicles integrated
+    1-Default: MAin cyle, responsible for project deployment
+    2-clean: To clean the project and remove all files generate by previus build
+    3-site: To create the project's site documentation
+  Each live cicle consist of a sequence of phases, default lifecycle has 23 pahases
+
+  PHASES
+          Each phase it's responsible for a specific task,
+          it Represents a stage in the maven build lifecycle
+
+  The most importants phases in default lifecycle are:
+     1-validate: checks if all resources necesary for build are available
+     2-compile: compile the sources
+     3-test-compile: conpile the test source code
+     4-test: run unit tests
+     5-package: package compiled sources into the distributable format like jar, war etc
+     6-integration-test: Process and deploy the package if needed to run and integration test
+     7-install: Install the package into a local repository
+     8-deploy: coppy the package into a remote repository
+
+  GOAL:
+         Each goal it responsible for specifi task and each phase is a sequence of goals:
+         when we run a specific phase  all goals bound to this phase are executed in order.
+    Some pahases and the default goals bound to them:
+    compiler:compile – the compile goal from the compiler plugin is bound to the compile phase
+    compiler:testCompile is bound to the test-compile phase
+    surefire:test is bound to test phase
+    install:install is bound to install phase
+    jar:jar and war:war is bound to package phase
+
+ PLUGIN:
+       It a goroup of goals that are't  nesscesary bound to the same phase.
+       in example see dockerfile-maven-plugin as below responsible for make a docker image and push them.
+To build a maven project we need execute one of the lifecycle running one of theri pahases
+example maven deploy, this execute the entired default lifecycle, we can stop on install pahse.
+but ussually we use maven clean install
+-->
+
+
+    <groupId>com.paymentchain</groupId>
+    <artifactId>paymentchainparent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>paymentchainparent</name>
+    <description>POM parent project for all spring boot projects</description>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <spring-boot.version>2.7.5</spring-boot.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <postgres.version>42.5.0</postgres.version>
+        <java-validation.version>2.0.1.Final</java-validation.version>
+        <dockerfile-maven-version>1.4.13</dockerfile-maven-version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+
+    <dependencies>
+        <!--Gives us the ability to quickly setup and run services
+        Property Defaults,Automatic Restart,Live Reload,Global Settings,Remote Applications for debug example via http-->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <!--If want exclude junit4 and use only junit5-->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!--Tghis plugin generate reports in two differents forma .txt and xml
+            in test phase when build life cicle is execuite-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M5</version>
+                <configuration>
+                    <useSystemClassLoader>false</useSystemClassLoader>
+                </configuration>
+            </plugin>
+            <!--It is the spring-boot repackage goal that repackages the JAR produced
+            by maven to specify the main class and make it executable using an embedded container-->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--   <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>${dockerfile-maven-version}</version>
+                <executions>
+                    <execution>
+                        <id>build-docker-image</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                           <goal>push</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <repository>digitalthinking/microservice-docker-${project.artifactId}</repository>
+                    <tag>${project.version}</tag>
+                    <buildArgs>
+                        <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+                    </buildArgs>
+                </configuration>
+            </plugin>-->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.9.1</version>
+                <configuration>
+                    <locales>en,fr,es</locales>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                </configuration>
+            </plugin>
+            <!--generate project code documentation-->
+            <!--  <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-javadoc-plugin</artifactId>
+                  <version>2.9</version>
+                  <executions>
+                      <execution>
+                          <id>attach-javadocs</id>
+                          <goals>
+                              <goal>jar</goal>
+                          </goals>
+                          <configuration>
+                              <additionalparam>${javadoc.opts}</additionalparam>
+                          </configuration>
+                      </execution>
+                  </executions>
+              </plugin>-->
+            <!--generate maven site documentation-->
+            <!--  <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-site-plugin</artifactId>
+                  <version>3.9.1</version>
+                  <configuration>
+                      <locales>es,es</locales>
+                  </configuration>
+                  <executions>
+                      <execution>
+                          <id>attach-javadocs</id>
+                          <goals>
+                              <goal>jar</goal>
+                          </goals>
+                          <configuration>
+                              <additionalparam>${javadoc.opts}</additionalparam>
+                          </configuration>
+                      </execution>
+                  </executions>
+              </plugin>-->
+        </plugins>
+    </build>
+    <modules>
+        <module>businessdomain</module>
+        <module>infraestructuredomain</module>
+    </modules>
+</project>

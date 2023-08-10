@@ -41,9 +41,15 @@ public class TransactionController {
         }else{
             transaction.setStatus(Transaction.Status.LIQUIDADA);
         }*/
-        transactionsValidations(transaction);
-        Transaction save =  transactionRepository.save(transaction);
-        return ResponseEntity.ok(save);
+
+        try{
+            transactionsValidations(transaction);
+            Transaction save =  transactionRepository.save(transaction);
+            return ResponseEntity.ok(save);
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body("Invalidad input: "+e.getMessage());
+        }
+
     }
 
     @PutMapping("/{id}")
@@ -82,7 +88,8 @@ public class TransactionController {
 
     public void transactionsValidations(Transaction transactionToAnalyze){
         //The amount will not zero
-        if(transactionToAnalyze.getAmount()==0)ResponseEntity.badRequest().build();
+        if(transactionToAnalyze.getAmount()==0.0)
+            throw new IllegalArgumentException("Amount cannot be zero");
         //If the fee is more than zero
         if(transactionToAnalyze.getFee()>0)transactionToAnalyze.setAmount(transactionToAnalyze.getAmount()-transactionToAnalyze.getFee());
         //if the transaction date is later than the current date then will be PENDIENTE, if not then LIQUIDADO

@@ -2,10 +2,12 @@ package com.paymentchain.businessdomain.transaction.controller;
 
 import com.paymentchain.businessdomain.transaction.entities.Transaction;
 import com.paymentchain.businessdomain.transaction.repository.TransactionRepository;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +30,18 @@ public class TransactionController {
 
     @PostMapping()
     public ResponseEntity<?> createTransaction(@RequestBody Transaction transaction){
+
+/*        //The amount will not zero
+        if(transaction.getAmount()==0)return ResponseEntity.badRequest().build();
+        //If the fee is more than zero
+        if(transaction.getFee()>0)transaction.setAmount(transaction.getAmount()-transaction.getFee());
+        //if the transaction date is later than the current date then will be PENDIENTE, if not then LIQUIDADO
+        if(transaction.getDateTime().after(new Date())){
+            transaction.setStatus(Transaction.Status.PENDIENTE);
+        }else{
+            transaction.setStatus(Transaction.Status.LIQUIDADA);
+        }*/
+        transactionsValidations(transaction);
         Transaction save =  transactionRepository.save(transaction);
         return ResponseEntity.ok(save);
     }
@@ -36,6 +50,8 @@ public class TransactionController {
     public ResponseEntity<?> updateTransaction(@PathVariable long id, @RequestBody Transaction inputTransaction){
 
         Optional<Transaction> optionalTransaction = transactionRepository.findById(id);
+
+        transactionsValidations(inputTransaction);
 
         if(optionalTransaction.isPresent()){
             Transaction newTransaction= optionalTransaction.get();
@@ -62,6 +78,19 @@ public class TransactionController {
         Transaction transactionToDelete= transactionRepository.findById(id).get();
         transactionRepository.delete(transactionToDelete);
         return ResponseEntity.ok().build();
+    }
+
+    public void transactionsValidations(Transaction transactionToAnalyze){
+        //The amount will not zero
+        if(transactionToAnalyze.getAmount()==0)ResponseEntity.badRequest().build();
+        //If the fee is more than zero
+        if(transactionToAnalyze.getFee()>0)transactionToAnalyze.setAmount(transactionToAnalyze.getAmount()-transactionToAnalyze.getFee());
+        //if the transaction date is later than the current date then will be PENDIENTE, if not then LIQUIDADO
+        if(transactionToAnalyze.getDateTime().after(new Date())){
+            transactionToAnalyze.setStatus(Transaction.Status.PENDIENTE);
+        }else{
+            transactionToAnalyze.setStatus(Transaction.Status.LIQUIDADA);
+        }
     }
 
 }

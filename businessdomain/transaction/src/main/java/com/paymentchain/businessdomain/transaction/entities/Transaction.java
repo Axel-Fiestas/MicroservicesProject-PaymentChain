@@ -12,7 +12,7 @@ import java.util.Date;
 @Data
 public class Transaction {
 
-    enum Status{
+    public enum Status{
 
         PENDIENTE("01"),
         LIQUIDADA("02"),
@@ -44,6 +44,10 @@ public class Transaction {
         }
     }
 
+    enum Channel{
+        WEB,CAJERO,OFICINA;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
@@ -53,6 +57,6 @@ public class Transaction {
     private double amount;
     private double fee;
     private String description;
-    private String status;
-    private String channel;
+    private Status status;
+    private Channel channel;
 }

@@ -4,6 +4,7 @@ import com.paymentchain.businessdomain.transaction.entities.Transaction;
 import com.paymentchain.businessdomain.transaction.repository.TransactionRepository;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,28 +56,32 @@ public class TransactionController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateTransaction(@PathVariable long id, @RequestBody Transaction inputTransaction){
 
-        Optional<Transaction> optionalTransaction = transactionRepository.findById(id);
 
-        transactionsValidations(inputTransaction);
+        try{
+            Optional<Transaction> optionalTransaction = transactionRepository.findById(id);
 
-        if(optionalTransaction.isPresent()){
-            Transaction newTransaction= optionalTransaction.get();
+            transactionsValidations(inputTransaction);
 
-            newTransaction.setFee(inputTransaction.getFee());
-            newTransaction.setAmount(inputTransaction.getAmount());
-            newTransaction.setChannel(inputTransaction.getChannel());
-            newTransaction.setReference(inputTransaction.getReference());
-            newTransaction.setStatus(inputTransaction.getStatus());
-            newTransaction.setAccountIban(inputTransaction.getAccountIban());
-            newTransaction.setDescription(inputTransaction.getDescription());
-            newTransaction.setDateTime(inputTransaction.getDateTime());
+            if(optionalTransaction.isPresent()){
+                Transaction newTransaction= optionalTransaction.get();
 
-            transactionRepository.save(newTransaction);
+                newTransaction.setFee(inputTransaction.getFee());
+                newTransaction.setAmount(inputTransaction.getAmount());
+                newTransaction.setChannel(inputTransaction.getChannel());
+                newTransaction.setReference(inputTransaction.getReference());
+                newTransaction.setStatus(inputTransaction.getStatus());
+                newTransaction.setAccountIban(inputTransaction.getAccountIban());
+                newTransaction.setDescription(inputTransaction.getDescription());
+                newTransaction.setDateTime(inputTransaction.getDateTime());
+                transactionRepository.save(newTransaction);
+                return ResponseEntity.ok("Transaction Update Sucessfully");
 
-            return ResponseEntity.ok("Transaction Update Sucessfully");
-
+            }
+            return new ResponseEntity<>("Transaccion no encontrada con ID: "+id, HttpStatus.NOT_FOUND);
+        }catch (IllegalArgumentException e){
+            return ResponseEntity.badRequest().body("Invalid input: "+e.getMessage());
         }
-        return ResponseEntity.notFound().build();
+
     }
 
     @DeleteMapping("/{id}")

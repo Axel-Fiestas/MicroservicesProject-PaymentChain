@@ -125,6 +125,9 @@ public class CustomerController {
         return name;
     }
 
+    //Cuando se llame al cliente se obtienen todas las transacciones del cliente
+
+
 
 
 }

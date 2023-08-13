@@ -110,6 +110,24 @@ public class CustomerController {
         return customer;
     }
 
+    @GetMapping("/transactionsInformation")
+    public Customer getAllTransactionsByAccountIban(@RequestParam String accountIban){
+        Customer customer = customerRepository.findByAccount(accountIban);
+
+        List<CustomerTransaction> transactions = customer.getTransactions();
+        transactions.forEach(transaction->{
+            List<Object>information = getUnitTransactionInformation(transaction.getTransactionId());
+            transaction.setDateTime((Date) information.get(0));
+            transaction.setAmount((Double)information.get(1));
+            transaction.setDescription((String) information.get(2));
+            transaction.setStatus((String)information.get(3));
+            transaction.setStatus((String) information.get(4));
+        });
+
+        return customer;
+
+    }
+
     private String getProductName(long id){
 
         WebClient build= webClientBuilder.clientConnector(new ReactorClientHttpConnector(client))

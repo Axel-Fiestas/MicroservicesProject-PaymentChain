@@ -3,11 +3,13 @@ package com.paymentchain.customer.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.paymentchain.customer.entities.Customer;
 import com.paymentchain.customer.entities.CustomerProduct;
+import com.paymentchain.customer.entities.CustomerTransaction;
 import com.paymentchain.customer.repository.CustomerRepository;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.epoll.EpollChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
+import io.swagger.v3.core.util.Json;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -18,10 +20,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
+import javax.persistence.Transient;
 import java.time.Duration;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @RestController
@@ -126,7 +127,32 @@ public class CustomerController {
     }
 
     //Cuando se llame al cliente se obtienen todas las transacciones del cliente
+    //1ero obtener la información de cada transacción unitaria
+    private List<Object> getUnitTransactionInformation(long id){
+        WebClient build= webClientBuilder.clientConnector(new ReactorClientHttpConnector(client))
+                .baseUrl("http://localhost:8082/transaction")
+                .defaultHeader(HttpHeaders.CONTENT_TYPE,MediaType.APPLICATION_JSON_VALUE)
+                .defaultUriVariables(Collections.singletonMap("url","http://localhost:8082/transaction"))
+                .build();
 
+        JsonNode block = build.method(HttpMethod.GET).uri("/"+id)
+                .retrieve().bodyToMono(JsonNode.class).block();
+
+        String datetime = block.get("dateTime").asText();
+        Double amount =block.get("amount").asDouble();
+        String description = block.get("description").asText();
+        String status = block.get("status").asText();
+        String channel = block.get("channel").asText();
+
+        List<Object> transactionInformation= new ArrayList<>();
+        transactionInformation.add(datetime);
+        transactionInformation.add(amount);
+        transactionInformation.add(description);
+        transactionInformation.add(status);
+        transactionInformation.add(channel);
+
+        return transactionInformation;
+    }
 
 
 

@@ -84,6 +84,7 @@ public class CustomerController {
     @PostMapping
     public ResponseEntity<?> post(@RequestBody Customer input){
         input.getProducts().forEach(element-> element.setCustomer(input));
+        input.getTransactions().forEach(element->element.setCustomer(input));
         Customer save = customerRepository.save(input);
         return ResponseEntity.ok(save);
     }

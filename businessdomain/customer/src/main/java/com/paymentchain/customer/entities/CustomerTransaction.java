@@ -15,7 +15,6 @@ public class CustomerTransaction {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
     private long transactionId;
-    @Transient
     private Date dateTime;
     @Transient
     private double amount;

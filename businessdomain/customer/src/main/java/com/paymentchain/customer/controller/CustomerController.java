@@ -22,6 +22,10 @@ import reactor.netty.http.client.HttpClient;
 
 import javax.persistence.Transient;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -114,16 +118,18 @@ public class CustomerController {
     @GetMapping("/transactionsInformation")
     public Customer getAllTransactionsByAccountIban(@RequestParam String accountIban){
         Customer customer = customerRepository.findByAccount(accountIban);
-
         List<CustomerTransaction> transactions = customer.getTransactions();
         transactions.forEach(transaction->{
-            List<Object>information = getUnitTransactionInformation(transaction.getTransactionId());
+
+            long idTransaction= transaction.getTransactionId();
+            //CustomerTransaction information = getUnitTransactionInformation();
             //transaction.setDateTime((Date) information.get(0));
 /*            transaction.setAmount((Double)information.get(1));
             transaction.setDescription((String) information.get(2));
             transaction.setStatus((String)information.get(3));
             transaction.setStatus((String) information.get(4));*/
-            transaction.setAmount(200);
+            //transaction.setAmount(200);
+            transaction.setDateTime(getDateTransactionInformation(idTransaction));
 
         });
 
@@ -149,7 +155,7 @@ public class CustomerController {
 
     //Cuando se llame al cliente se obtienen todas las transacciones del cliente
     //1ero obtener la información de cada transacción unitaria
-    private List<Object> getUnitTransactionInformation(long id){
+    private Date getDateTransactionInformation(long id){
         WebClient build= webClientBuilder.clientConnector(new ReactorClientHttpConnector(client))
                 .baseUrl("http://localhost:8082/transaction")
                 .defaultHeader(HttpHeaders.CONTENT_TYPE,MediaType.APPLICATION_JSON_VALUE)
@@ -159,20 +165,17 @@ public class CustomerController {
         JsonNode block = build.method(HttpMethod.GET).uri("/"+id)
                 .retrieve().bodyToMono(JsonNode.class).block();
 
-        String datetime = block.get("dateTime").asText();
-        Double amount =block.get("amount").asDouble();
-        String description = block.get("description").asText();
-        String status = block.get("status").asText();
-        String channel = block.get("channel").asText();
+        String datetimeString = block.get("dateTime").asText();
 
-        List<Object> transactionInformation= new ArrayList<>();
-        transactionInformation.add(datetime);
-        transactionInformation.add(amount);
-        transactionInformation.add(description);
-        transactionInformation.add(status);
-        transactionInformation.add(channel);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        LocalDateTime localDateTime = LocalDateTime.parse(datetimeString, formatter);
 
-        return transactionInformation;
+        return convertLocalDateTimeToDate(localDateTime);
+    }
+
+    private Date convertLocalDateTimeToDate(LocalDateTime localDateTime) {
+        Instant instant = localDateTime.atZone(ZoneId.systemDefault()).toInstant();
+        return Date.from(instant);
     }
 
 

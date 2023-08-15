@@ -118,11 +118,13 @@ public class CustomerController {
         List<CustomerTransaction> transactions = customer.getTransactions();
         transactions.forEach(transaction->{
             List<Object>information = getUnitTransactionInformation(transaction.getTransactionId());
-            transaction.setDateTime((Date) information.get(0));
-            transaction.setAmount((Double)information.get(1));
+            //transaction.setDateTime((Date) information.get(0));
+/*            transaction.setAmount((Double)information.get(1));
             transaction.setDescription((String) information.get(2));
             transaction.setStatus((String)information.get(3));
-            transaction.setStatus((String) information.get(4));
+            transaction.setStatus((String) information.get(4));*/
+            transaction.setAmount(200);
+
         });
 
         return customer;

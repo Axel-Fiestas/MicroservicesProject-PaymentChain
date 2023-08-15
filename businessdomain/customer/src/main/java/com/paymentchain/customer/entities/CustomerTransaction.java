@@ -8,11 +8,12 @@ import java.util.Date;
 
 @Data
 @Entity
+
 public class CustomerTransaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    long id;
+    private long id;
     private long transactionId;
     @Transient
     private Date dateTime;

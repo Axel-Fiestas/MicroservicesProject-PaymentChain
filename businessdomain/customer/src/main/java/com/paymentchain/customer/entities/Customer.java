@@ -26,6 +26,6 @@ public class Customer {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CustomerProduct> products;
 /*    @Transient //osea que no vamos a guardarlo en la base de datos*/
-    @OneToMany(fetch = FetchType.LAZY,mappedBy = "customer",cascade = CascadeType.ALL,orphanRemoval = true)
-    private List<CustomerTransaction> transactions;
+    @Transient
+    private List<?> transactions;
 }

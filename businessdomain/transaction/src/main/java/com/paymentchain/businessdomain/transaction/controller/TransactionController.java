@@ -29,6 +29,10 @@ public class TransactionController {
         return transactionRepository.findById(id).get();
     }
 
+    @GetMapping("/customer/transactions")
+    public List<Transaction> getByIbanCode (@RequestParam String ibanAccount){
+        return transactionRepository.findByAccountIban(ibanAccount);
+    }
     @PostMapping()
     public ResponseEntity<?> createTransaction(@RequestBody Transaction transaction){
 

@@ -89,7 +89,8 @@ public class CustomerController {
     @PostMapping
     public ResponseEntity<?> post(@RequestBody Customer input){
         input.getProducts().forEach(element-> element.setCustomer(input));
-        input.getTransactions().forEach(element->element.setCustomer(input));
+
+        //input.getTransactions().forEach(element->element.setCustomer(input));
         Customer save = customerRepository.save(input);
         return ResponseEntity.ok(save);
     }
@@ -113,10 +114,13 @@ public class CustomerController {
             x.setProductName(productName);
         });
 
+        List<?>transactions = getTransactions(customer.getIban());
+        customer.setTransactions(transactions);
+
         return customer;
     }
 
-    @GetMapping("/transactionsInformation")
+/*    @GetMapping("/transactionsInformation")
     public Customer getAllTransactionsByAccountIban(@RequestParam String accountIban){
         Customer customer = customerRepository.findByAccount(accountIban);
         List<CustomerTransaction> transactions = customer.getTransactions();
@@ -134,7 +138,7 @@ public class CustomerController {
 
         return customer;
 
-    }
+    }*/
 
     private String getProductName(long id){
 
@@ -150,6 +154,21 @@ public class CustomerController {
         String name=block.get("name").asText();
 
         return name;
+    }
+
+    private List<?>getTransactions(String iban){
+        WebClient build= webClientBuilder.clientConnector(new ReactorClientHttpConnector(client))
+                .baseUrl("http://localhost:8082/transaction")
+                .defaultHeader(HttpHeaders.CONTENT_TYPE,MediaType.APPLICATION_JSON_VALUE)
+                .build();
+
+        List<?> transactions=build.method(HttpMethod.GET).uri(uriBuilder -> uriBuilder
+                .path("/customer/transactions")
+                .queryParam("ibanAccount",iban)
+                .build())
+                .retrieve().bodyToFlux(Object.class).collectList().block();
+
+        return transactions;
     }
 
     //Cuando se llame al cliente se obtienen todas las transacciones del cliente

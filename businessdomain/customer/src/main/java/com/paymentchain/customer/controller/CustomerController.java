@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.paymentchain.customer.entities.Customer;
 import com.paymentchain.customer.entities.CustomerProduct;
 import com.paymentchain.customer.entities.CustomerTransaction;
+import com.paymentchain.customer.entities.TransactionInformation;
 import com.paymentchain.customer.repository.CustomerRepository;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.epoll.EpollChannelOption;
@@ -122,15 +123,13 @@ public class CustomerController {
         transactions.forEach(transaction->{
 
             long idTransaction= transaction.getTransactionId();
-            //CustomerTransaction information = getUnitTransactionInformation();
-            //transaction.setDateTime((Date) information.get(0));
-/*            transaction.setAmount((Double)information.get(1));
-            transaction.setDescription((String) information.get(2));
-            transaction.setStatus((String)information.get(3));
-            transaction.setStatus((String) information.get(4));*/
-            //transaction.setAmount(200);
-            transaction.setDateTime(getDateTransactionInformation(idTransaction));
+            TransactionInformation information = getTransactionInformation(idTransaction);
 
+            transaction.setDateTime(information.getDateTime());
+            transaction.setChannel(information.getChannel());
+            transaction.setDescription(information.getDescription());
+            transaction.setAmount(information.getAmount());
+            transaction.setStatus(information.getStatus());
         });
 
         return customer;
@@ -155,7 +154,7 @@ public class CustomerController {
 
     //Cuando se llame al cliente se obtienen todas las transacciones del cliente
     //1ero obtener la información de cada transacción unitaria
-    private Date getDateTransactionInformation(long id){
+    private TransactionInformation getTransactionInformation(long id){
         WebClient build= webClientBuilder.clientConnector(new ReactorClientHttpConnector(client))
                 .baseUrl("http://localhost:8082/transaction")
                 .defaultHeader(HttpHeaders.CONTENT_TYPE,MediaType.APPLICATION_JSON_VALUE)
@@ -166,11 +165,25 @@ public class CustomerController {
                 .retrieve().bodyToMono(JsonNode.class).block();
 
         String datetimeString = block.get("dateTime").asText();
+        Double amount = block.get("amount").asDouble();
+        String description=block.get("description").asText();
+        String status = block.get("status").asText();
+        String channel = block.get("channel").asText();
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         LocalDateTime localDateTime = LocalDateTime.parse(datetimeString, formatter);
+        Date finalDate= convertLocalDateTimeToDate(localDateTime);
 
-        return convertLocalDateTimeToDate(localDateTime);
+        TransactionInformation finalInformation = new TransactionInformation();
+
+        finalInformation.setDateTime(finalDate);
+        finalInformation.setStatus(status);
+        finalInformation.setAmount(amount);
+        finalInformation.setDescription(description);
+        finalInformation.setChannel(channel);
+
+
+        return finalInformation;
     }
 
     private Date convertLocalDateTimeToDate(LocalDateTime localDateTime) {

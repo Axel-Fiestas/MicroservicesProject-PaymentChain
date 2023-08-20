@@ -11,6 +11,8 @@
     <file url="file://$PROJECT_DIR$/businessdomain/transaction/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/businessdomain/transactions/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/businessdomain/transactions/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/infraestructuredomain/eurekaserver/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/infraestructuredomain/eurekaserver/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/infraestructuredomain/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/infraestructuredomain/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
